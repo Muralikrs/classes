@@ -127,15 +127,18 @@
         </div>
     </div>
     
-<!-- Include Firebase SDKs -->
+
+</body>
+
+
+
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+<!-- ... (your existing HTML code) ... -->
 
-<!-- Initialize Firebase and add JavaScript code -->
 <script>
-    // Your Firebase configuration here
     const firebaseConfig = {
   apiKey: "AIzaSyD1-3lDy6kQB4hTUllQfDDJc8gwuFx2t38",
   authDomain: "devoties-38141.firebaseapp.com",
@@ -150,66 +153,53 @@
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
 
-    const signinForm = document.querySelector("#signinForm");
-    signinForm.addEventListener("submit", function(e) {
+    const signinForm = document.getElementById("signinForm");
+
+    signinForm.addEventListener("submit", (e) => {
         e.preventDefault();
 
-        const name = document.querySelector("#name").value;
-        const email = document.querySelector("#email").value;
-        const password = document.querySelector("#password").value;
-        const whatsapp = document.querySelector("#whatsapp").value;
-        const location = document.querySelector("#location").value;
-        
+        const name = signinForm.name.value;
+        const email = signinForm.email.value;
+        const password = signinForm.password.value;
+        const whatsapp = signinForm.whatsapp.value;
+        const location = signinForm.location.value;
 
-        // Sign in with email and password
+        // Create user with email and password
         firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then(function(userCredential) {
-                const uid = userCredential.user.uid;
-                // Store user data in the Firebase Realtime Database
-                firebase.database().ref("users/" + uid).set({
-                    name: name,
-                    whatsapp: whatsapp,
-                    location: location,
-                    mid: ""
-                });
+            .then((userCredential) => {
+                const user = userCredential.user;
                
 
-                signinForm.reset();
+                // Store user data in the Realtime Database
+                const database = firebase.database();
+                const userData = {
+                    name: name,
+                    whatsappNumber: whatsapp,
+                    mid: "0p",
+                    location: location
+                };
 
-                window.location.href = login.html";
-
-                // Open the login page
-                // window.location.href = "login.html"; 
+                database.ref("users/" + user.uid).set(userData)
+                    .then(() => {
+                        alert("User data stored successfully.");
+                        // Show a success popup or redirect to another page
+                        window.location.href = "login.html";
+                    })
+                    .catch((error) => {
+                        console.log("Error storing user data:", error.message);
+                    });
             })
-            .catch(function(error) {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error(errorMessage);
-                alert(errorMessage);
+            .catch((error) => {
+                console.log("Sign-up error:", error.message);
             });
     });
-    function generateAndDownloadQR(uid) {
-        // Generate QR code
-        const qrcodeDiv = document.createElement("div");
-        const qrcode = new QRCode(qrcodeDiv, {
-            text: uid,
-            width: 256,
-            height: 256
-        });
 
-        // Create a canvas from the QR code
-        const canvas = qrcodeDiv.querySelector("canvas");
-
-        // Create a data URL from the canvas and trigger download
-        const dataUrl = canvas.toDataURL("image/png");
-        const downloadLink = document.createElement("a");
-        downloadLink.href = dataUrl;
-        downloadLink.download = "qrcode.png";
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+    function showSuccessPopup() {
+        const popup = document.getElementById("popup");
+        popup.style.display = "flex";
     }
 </script>
-</body>
+
+<!-- ... (your existing HTML code) ... -->
+
 </html>
